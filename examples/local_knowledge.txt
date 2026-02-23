@@ -1,0 +1,7 @@
+Standard Operating Procedures for pCompiler:
+
+1. Always validate the input YAML against the Pydantic schema before compilation.
+2. Use the 'strict' security level for all public-facing API endpoints.
+3. Prioritize 'summarize' and 'extract' tasks for legal document processing.
+4. When dealing with large contexts, use the 'ranked' combine strategy with a max_total_tokens limit.
+5. Optimization passes (Reorder, Compress, CoT) should be applied in that specific order.

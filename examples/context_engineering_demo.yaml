@@ -1,0 +1,30 @@
+task: generate
+model_target: gpt-4o
+version: "1.0"
+description: "Generate a developer guide showing how to handle RAG with pCompiler."
+
+context:
+  sources:
+    - type: static
+      value: "pCompiler now supports a dedicated context engineering layer for RAG."
+      priority: 100
+    - type: local_file
+      value: "examples/local_knowledge.txt"
+      priority: 80
+    - type: vector_store
+      query: "How to register a ContextProvider for RAG?"
+      priority: 60
+  combine_strategy: ranked
+  max_total_tokens: 1500
+
+instructions:
+  - text: "Highlight the benefits of using a declarative DSL for context management."
+    priority: 90
+  - text: "Mention support for static, file-based, and vector-based sources."
+    priority: 70
+
+user_input_template: "Write a 3-paragraph quickstart guide based on the provided context."
+
+constraints:
+  tone: technical
+  include_confidence: true

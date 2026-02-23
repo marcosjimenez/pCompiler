@@ -38,6 +38,7 @@ from pcompiler.optimizer.reorder import reorder_sections
 from pcompiler.plugins.base import CompiledPrompt, PluginManager
 from pcompiler.security.policies import build_policy_set, policy_to_system_lines
 from pcompiler.security.sanitizer import build_system_boundary, wrap_user_input
+from pcompiler.context_manager import ContextManager
 
 
 # ---------------------------------------------------------------------------
@@ -99,6 +100,7 @@ class PromptCompiler:
         self.registry = ModelRegistry()
         self.plugins = plugin_manager or PluginManager()
         self.cache = cache or (PromptCache() if enable_cache else None)
+        self.context_manager = ContextManager()
 
     # ------------------------------------------------------------------
     # Public API
@@ -271,7 +273,9 @@ class PromptCompiler:
 
         # --- Context ---
         if spec.context:
-            ir.add(SectionKind.CONTEXT, spec.context, priority=70)
+            resolved_context = self.context_manager.resolve_context(spec.context)
+            if resolved_context:
+                ir.add(SectionKind.CONTEXT, resolved_context, priority=70)
 
         # --- Instructions ---
         # From task template defaults

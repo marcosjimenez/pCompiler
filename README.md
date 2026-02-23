@@ -9,6 +9,7 @@ A prompt compiler that transforms declarative DSL definitions into optimised, mo
 - **Static analysis** — ambiguity detection, contradiction checking, injection risk scoring
 - **Optimization** — instruction reordering, semantic compression, auto chain-of-thought
 - **Security** — input sanitization, anti-injection policies, system/user separation
+- **Context Engineering** — dynamic retrieval (RAG), priority-based ranking, and token-aware pruning
 - **Observability** — compilation traces, SHA-256 versioning, full reproducibility
 
 ## Quick Start
@@ -44,6 +45,13 @@ constraints:
   max_tokens: 500
   tone: formal
   include_risks: true
+context:
+  sources:
+    - type: static
+      value: "User is a senior legal partner."
+    - type: local_file
+      value: "examples/local_knowledge.txt"
+  max_total_tokens: 1000
 instructions:
   - text: "Summarize the key clauses."
     priority: 80

@@ -93,6 +93,32 @@ class CustomInstruction(BaseModel):
     priority: int = Field(0, ge=0, le=100, description="Higher = more important (0-100).")
 
 
+class ContextSourceType(str, Enum):
+    """Types of context sources supported by pCompiler."""
+    STATIC = "static"
+    DYNAMIC = "dynamic"
+    VECTOR_STORE = "vector_store"
+    WEB_SEARCH = "web_search"
+    LOCAL_FILE = "local_file"
+
+
+class ContextSource(BaseModel):
+    """Definition of a single context source."""
+    type: ContextSourceType = ContextSourceType.STATIC
+    value: str | None = None
+    query: str | None = None
+    max_tokens: int | None = Field(None, gt=0)
+    priority: int = Field(50, ge=0, le=100)
+    config: dict[str, Any] = Field(default_factory=dict)
+
+
+class ContextConfig(BaseModel):
+    """Container for multiple context sources and optimization settings."""
+    sources: list[ContextSource] = Field(default_factory=list)
+    combine_strategy: str = Field("ranked", description="How to merge sources: 'ranked' or 'ordered'.")
+    max_total_tokens: int | None = Field(None, gt=0)
+
+
 # ---------------------------------------------------------------------------
 # Top-level PromptSpec
 # ---------------------------------------------------------------------------
@@ -113,6 +139,13 @@ class PromptSpec(BaseModel):
         instructions:
           - text: "Summarize the key clauses and risks."
             priority: 80
+        context:
+          sources:
+            - type: static
+              value: "The user is a senior legal partner."
+            - type: local_file
+              value: "contract_terms.txt"
+          max_total_tokens: 2000
         few_shot_examples:
           - input: "Contract clause about liability…"
             output: "The liability clause limits…"
@@ -133,7 +166,9 @@ class PromptSpec(BaseModel):
     task: str = Field(..., min_length=1, description="Name of the task (e.g. summarize, classify).")
     input_type: str = Field("text", description="Semantic type of the input data.")
     model_target: str = Field("gpt-4o", description="Target model identifier.")
-    context: str | None = Field(None, description="Optional static context to inject.")
+    context: str | ContextConfig | None = Field(
+        None, description="Static context or dynamic context configuration."
+    )
     user_input_template: str | None = Field(
         None,
         description="Template for user input (use {input} placeholder).",

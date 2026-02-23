@@ -9,7 +9,7 @@ The `pCompiler` uses a declarative YAML Domain Specific Language (DSL) to define
 | `task` | `string` | **Yes** | Name of the task (e.g., `summarize`, `code_generation`). |
 | `input_type` | `string` | No | Semantic type of input (e.g., `legal_contract`, `customer_email`). Default: `text`. |
 | `model_target` | `string` | No | Target model identifier. Default: `gpt-4o`. |
-| `context` | `string` | No | Static context or background information to include. |
+| `context` | `string` or `Object` | No | Static context or dynamic context configuration (sources, ranking, pruning). |
 | `user_input_template` | `string` | No | Template for the user input. Use `{input}` placeholder. |
 | `constraints` | `Object` | No | Constraints governing the output behavior. |
 | `instructions` | `Array` | No | List of custom instructions with priorities. |
@@ -50,6 +50,19 @@ Provides in-context learning examples.
 - `input` (string): Example user query.
 - `output` (string): Expected model response.
 - `explanation` (string): Optional reasoning for the example.
+
+### `context`
+
+Defines dynamic background information to be injected into the prompt.
+
+- `sources` (Array): List of context sources.
+    - `type` (enum): `static`, `local_file`, `vector_store`, `web_search`.
+    - `value` (string): Text value for `static` or file path for `local_file`.
+    - `query` (string): Search query for `vector_store` or `web_search`.
+    - `priority` (int): 0-100 (default: 50). Used for ranking when pruning.
+    - `config` (dict): Provider-specific configuration.
+- `combine_strategy` (enum): `ranked` (default) or `ordered`.
+- `max_total_tokens` (int): Optional limit for the entire context block.
 
 ### `output_schema`
 
