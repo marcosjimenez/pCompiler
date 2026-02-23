@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pcompiler"
+version = "0.1.0"
+description = "A prompt compiler that transforms declarative DSL definitions into optimized, model-specific LLM prompts."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Marco" },
+]
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "jsonschema>=4.0",
+    "click>=8.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[project.scripts]
+pcompile = "pcompiler.cli:main"
+
+[project.entry-points."pcompiler.plugins"]
+openai = "pcompiler.plugins.openai_plugin:OpenAIPlugin"
+anthropic = "pcompiler.plugins.anthropic_plugin:AnthropicPlugin"
+google = "pcompiler.plugins.google_plugin:GooglePlugin"

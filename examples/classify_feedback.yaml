@@ -1,0 +1,47 @@
+# Classification example
+task: classify
+input_type: customer_feedback
+model_target: claude-3.5-sonnet
+description: "Classify customer feedback into sentiment categories."
+
+constraints:
+  max_tokens: 200
+  tone: neutral
+  temperature: 0.3
+  cot_policy: always
+
+instructions:
+  - text: "Classify the feedback as positive, negative, or neutral."
+    priority: 90
+  - text: "Provide a confidence score for your classification."
+    priority: 70
+
+few_shot_examples:
+  - input: "The product exceeded my expectations. Great quality!"
+    output: "Classification: positive (confidence: 95%)"
+  - input: "Terrible experience. Product arrived broken and support was unhelpful."
+    output: "Classification: negative (confidence: 98%)"
+  - input: "The product works as described. Nothing special."
+    output: "Classification: neutral (confidence: 85%)"
+
+output_schema:
+  type: object
+  properties:
+    classification:
+      type: string
+    confidence:
+      type: number
+    reasoning:
+      type: string
+  required:
+    - classification
+    - confidence
+
+security:
+  level: moderate
+
+version: "1.0"
+tags:
+  - nlp
+  - classification
+  - sentiment

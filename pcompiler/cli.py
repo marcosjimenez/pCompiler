@@ -1,0 +1,197 @@
+"""
+CLI entry point for the prompt compiler.
+
+Commands::
+
+    pcompile compile prompt.yaml --target gpt-4o --output result.json
+    pcompile validate prompt.yaml
+    pcompile models
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import click
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+from pcompiler import __version__
+from pcompiler.compiler import PromptCompiler
+from pcompiler.dsl.parser import ParseError
+
+console = Console()
+err_console = Console(stderr=True)
+
+
+def _create_compiler() -> PromptCompiler:
+    return PromptCompiler()
+
+
+# ---------------------------------------------------------------------------
+# Main group
+# ---------------------------------------------------------------------------
+
+@click.group()
+@click.version_option(__version__, prog_name="pcompile")
+def main() -> None:
+    """pCompiler — compile declarative prompt specs into optimised LLM prompts."""
+
+
+# ---------------------------------------------------------------------------
+# compile
+# ---------------------------------------------------------------------------
+
+@main.command()
+@click.argument("file", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--target", "-t",
+    default=None,
+    help="Target model (overrides the spec's model_target). e.g. gpt-4o, claude-3.5-sonnet",
+)
+@click.option(
+    "--output", "-o",
+    default=None,
+    type=click.Path(),
+    help="Write JSON output to a file instead of stdout.",
+)
+@click.option(
+    "--show-trace/--no-trace",
+    default=False,
+    help="Include the compilation trace in the output.",
+)
+def compile(file: str, target: str | None, output: str | None, show_trace: bool) -> None:
+    """Compile a DSL file into an optimised, model-specific prompt."""
+    compiler = _create_compiler()
+
+    try:
+        result = compiler.compile_file(file, target=target)
+    except ParseError as exc:
+        err_console.print(f"[bold red]Parse Error:[/] {exc}")
+        sys.exit(1)
+    except KeyError as exc:
+        err_console.print(f"[bold red]Error:[/] {exc}")
+        sys.exit(1)
+
+    # Build output dict
+    out: dict = {
+        "model_target": result.model_target,
+        "plugin": result.plugin_used,
+        "parameters": result.parameters,
+        "payload": result.payload,
+        "prompt_text": result.prompt_text,
+    }
+    if result.warnings:
+        out["warnings"] = result.warnings
+    if show_trace:
+        out["trace"] = result.trace
+
+    json_str = json.dumps(out, indent=2, ensure_ascii=False)
+
+    if output:
+        Path(output).write_text(json_str, encoding="utf-8")
+        console.print(f"[green]✓[/] Compiled prompt written to [bold]{output}[/]")
+    else:
+        console.print(Panel(json_str, title="Compiled Prompt", border_style="green"))
+
+    # Show warnings
+    if result.warnings:
+        console.print()
+        console.print("[yellow]⚠ Warnings:[/]")
+        for w in result.warnings:
+            console.print(f"  • {w}")
+
+
+# ---------------------------------------------------------------------------
+# validate
+# ---------------------------------------------------------------------------
+
+@main.command()
+@click.argument("file", type=click.Path(exists=True, dir_okay=False))
+def validate(file: str) -> None:
+    """Validate a DSL file (static analysis only, no compilation)."""
+    compiler = _create_compiler()
+
+    try:
+        analysis = compiler.validate_file(file)
+    except ParseError as exc:
+        err_console.print(f"[bold red]Parse Error:[/] {exc}")
+        sys.exit(1)
+    except KeyError as exc:
+        err_console.print(f"[bold red]Error:[/] {exc}")
+        sys.exit(1)
+
+    warnings = analysis.all_warnings
+    has_errors = analysis.has_errors
+
+    if not warnings and not has_errors:
+        console.print("[green]✓ Validation passed — no issues found.[/]")
+        return
+
+    if has_errors:
+        console.print("[bold red]✗ Validation failed with errors:[/]")
+    else:
+        console.print("[yellow]⚠ Validation passed with warnings:[/]")
+
+    for w in warnings:
+        colour = "red" if "error" in w.lower() else "yellow"
+        console.print(f"  [{colour}]•[/] {w}")
+
+    # Summary
+    console.print()
+    console.print(
+        f"  Clarity score: [bold]{analysis.ambiguity.clarity_score}[/]  |  "
+        f"Injection risk: [bold]{analysis.injection.overall_risk.value}[/]"
+    )
+
+    if has_errors:
+        sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# models
+# ---------------------------------------------------------------------------
+
+@main.command()
+def models() -> None:
+    """List all available target models and plugins."""
+    compiler = _create_compiler()
+
+    table = Table(title="Available Models & Plugins", show_lines=True)
+    table.add_column("Model", style="bold cyan")
+    table.add_column("Provider")
+    table.add_column("Context", justify="right")
+    table.add_column("Max Output", justify="right")
+    table.add_column("JSON Mode")
+    table.add_column("Function Calling")
+
+    for name in compiler.registry.list_models():
+        profile = compiler.registry.get(name)
+        table.add_row(
+            name,
+            profile.provider,
+            f"{profile.max_context_tokens:,}",
+            f"{profile.max_output_tokens:,}",
+            "✓" if profile.supports_json_mode else "✗",
+            "✓" if profile.supports_function_calling else "✗",
+        )
+
+    console.print(table)
+
+    console.print()
+    plugins = compiler.plugins.list_plugins()
+    if plugins:
+        console.print(f"[bold]Loaded plugins:[/] {', '.join(plugins)}")
+    else:
+        console.print("[yellow]No plugins loaded.[/]")
+
+
+# ---------------------------------------------------------------------------
+# Entry
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    main()

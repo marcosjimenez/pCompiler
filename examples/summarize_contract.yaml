@@ -1,0 +1,59 @@
+# pCompiler summarize contract example
+task: summarize
+input_type: legal_contract
+model_target: gpt-4o
+description: "Summarize a legal contract highlighting key clauses and risks."
+
+constraints:
+  max_tokens: 500
+  tone: formal
+  include_risks: true
+  cot_policy: auto
+
+instructions:
+  - text: "Summarize the key clauses and identify potential risks."
+    priority: 80
+  - text: "Use clear, professional language suitable for a legal audience."
+    priority: 60
+
+few_shot_examples:
+  - input: |
+      CLAUSE 7 - LIABILITY: The Provider shall not be liable for any
+      indirect, incidental, or consequential damages arising from the
+      use or inability to use the services.
+    output: |
+      **Liability Clause (§7):** Limits provider liability to direct damages
+      only. Excludes indirect, incidental, and consequential damages.
+      *Risk: Broad exclusion may limit client recourse in case of service failure.*
+
+output_schema:
+  type: object
+  properties:
+    summary:
+      type: string
+    key_clauses:
+      type: array
+      items:
+        type: object
+        properties:
+          clause_name:
+            type: string
+          description:
+            type: string
+    risks:
+      type: array
+      items:
+        type: string
+  required:
+    - summary
+    - key_clauses
+
+security:
+  level: strict
+  block_code_execution: true
+  block_system_prompt_leak: true
+
+version: "1.0"
+tags:
+  - legal
+  - summarization

@@ -1,0 +1,50 @@
+# Data extraction example targeting Gemini
+task: extract
+input_type: invoice
+model_target: gemini-1.5-pro
+description: "Extract structured data from invoice documents."
+
+constraints:
+  max_tokens: 300
+  tone: technical
+  temperature: 0.1
+
+instructions:
+  - text: "Extract all fields exactly as they appear. Do not infer missing data."
+    priority: 95
+
+output_schema:
+  type: object
+  properties:
+    invoice_number:
+      type: string
+    date:
+      type: string
+    vendor:
+      type: string
+    total_amount:
+      type: number
+    line_items:
+      type: array
+      items:
+        type: object
+        properties:
+          description:
+            type: string
+          quantity:
+            type: integer
+          unit_price:
+            type: number
+  required:
+    - invoice_number
+    - date
+    - vendor
+    - total_amount
+
+security:
+  level: moderate
+
+version: "1.0"
+tags:
+  - extraction
+  - documents
