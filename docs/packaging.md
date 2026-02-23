@@ -35,20 +35,3 @@ Or install in editable mode for development:
 ```bash
 pip install -e .
 ```
-
-## Publishing to PyPI
-
-If you wish to share `pCompiler` with the world:
-
-1.  **Register** an account on [PyPI](https://pypi.org/).
-2.  **Install Twine**:
-    ```bash
-    pip install twine
-    ```
-3.  **Upload to PyPI**:
-    ```bash
-    twine upload dist/*
-    ```
-
-> [!IMPORTANT]
-> Always increment the `version` field in `pyproject.toml` and `pcompiler/__init__.py` before uploading a new version to PyPI.
