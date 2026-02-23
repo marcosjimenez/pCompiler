@@ -1,79 +1,113 @@
 # pCompiler
 
-A prompt compiler that transforms declarative DSL definitions into optimised, model-specific LLM prompts.
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](pyproject.toml)
+[![Python](https://img.shields.io/badge/python-3.11+-green.svg)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 
-## Features
+**pCompiler** is a declarative prompt engineering framework that transforms high-level DSL definitions into optimized, model-specific LLM prompts. It bridges the gap between raw text prompting and structured, versioned, and secure prompt management.
 
-- **YAML DSL** — define prompts as typed, versionable specs
-- **Plugin system** — extensible backends for OpenAI, Anthropic, Google (and custom)
-- **Static analysis** — ambiguity detection, contradiction checking, injection risk scoring
-- **Optimization** — instruction reordering, semantic compression, auto chain-of-thought
-- **Security** — input sanitization, anti-injection policies, system/user separation
-- **Context Engineering** — dynamic retrieval (RAG), priority-based ranking, and token-aware pruning
-- **Observability** — compilation traces, SHA-256 versioning, full reproducibility
+## 🚀 Key Features
 
-## Quick Start
+- **Declarative YAML DSL**: Define prompts as typed, versionable specifications.
+- **Context Engineering (RAG)**: Dynamic retrieval from static text, local files, vector stores, and web search.
+- **Auto-Evals System**: Built-in automated metrics (`exact_match`, `regex`) and LLM-as-a-judge for quantitative prompt refinement.
+- **Multi-Model Optimization**: Auto-reordering, semantic compression, and Chain-of-Thought (CoT) policies tailored for OpenAI, Anthropic, Gemini, and more.
+- **Built-in Security**: Anti-injection policies, system/user separation, and input sanitization.
+- **Deep Observability**: Full compilation traces, SHA-256 versioning, and reproducibility logs.
+- **Extensible Plugin System**: Easily add custom backends, optimizers, or context providers.
+
+## 📦 Installation
 
 ```bash
-pip install -e ".[dev]"
+# Clone the repository
+git clone https://github.com/marcosjimenez/pCompiler.git
+cd pCompiler
 
-# Compile a prompt spec
-pcompile compile examples/summarize_contract.yaml --target gpt-4o
-
-# Validate only (no compilation)
-pcompile validate examples/summarize_contract.yaml
-
-# List available models
-pcompile models
+# Install in editable mode
+pip install -e "."
 ```
 
-## Documentation
+## 🛠 Quick Start
 
-For detailed information, see:
-- [CLI Reference](docs/cli.md) — Detailed guide for all `pcompile` commands and parameters.
-- [DSL Specification](docs/dsl.md) — Full specification of the YAML prompt definition language.
-- [Auto-Evals Guide](docs/evals.md) — How to define and run automated prompt evaluations.
-- [CI/CD Integration](docs/cicd.md) — How to use `pCompiler` in your automated pipelines.
-- [Packaging and Distribution](docs/packaging.md) — How to build and install `pCompiler` via `pip`.
-
-## DSL Example
+1. **Define your prompt (`summarize.yaml`):**
 
 ```yaml
 task: summarize
-input_type: legal_contract
 model_target: gpt-4o
-constraints:
-  max_tokens: 500
-  tone: formal
-  include_risks: true
+version: "1.2.0"
+
 context:
   sources:
     - type: static
-      value: "User is a senior legal partner."
+      value: "The user is a legal expert."
     - type: local_file
-      value: "examples/local_knowledge.txt"
-  max_total_tokens: 1000
+      value: "knowledge_base.txt"
+  max_total_tokens: 1500
+
 instructions:
-  - text: "Summarize the key clauses."
+  - text: "Summarize the contract focusing on liability clauses."
+    priority: 100
+  - text: "Use formal legal terminology."
     priority: 80
-security:
-  level: strict
+
+evals:
+  threshold: 0.9
+  cases:
+    - name: "Short liability"
+      input: { input: "Clause 1: Party A is liable for..." }
+      expected: "Liability assigned to Party A"
+      metrics: [includes, llm_judge]
 ```
 
-## Tests
+2. **Compile it:**
 
 ```bash
-python -m pytest tests/ -v
+# Generate the optimized payload
+pcompile compile summarize.yaml --target gpt-4o
 ```
 
-## Using as Python API
+3. **Validate it:**
+
+```bash
+# Check for ambiguities, contradictions, and injection risks
+pcompile validate summarize.yaml
+```
+
+4. **Run Evals:**
+
+```bash
+# Run automated tests to ensure quality
+pcompile eval summarize.yaml --mock
+```
+
+## 📖 Documentation
+
+- [**DSL Specification**](docs/dsl.md): Full reference for the YAML schema.
+- [**Auto-Evals Guide**](docs/evals.md): How to build and run automated prompt quality tests.
+- [**Context Engineering**](docs/dsl.md#context): Strategies for RAG and dynamic background information.
+- [**CLI Reference**](docs/cli.md): Detailed usage for all `pcompile` commands.
+- [**CI/CD Integration**](docs/cicd.md): Automating validation and testing in your pipeline.
+- [**Packaging**](docs/packaging.md): How to build and distribute pCompiler.
+
+## 🐍 Python API
 
 ```python
 from pcompiler.compiler import PromptCompiler
 
 compiler = PromptCompiler()
-result = compiler.compile_file("examples/summarize_contract.yaml", target="gpt-4o")
-print(result.prompt_text)        # plain text
-print(result.payload)            # model specific payload
-print(result.parameters)         # recommended parameters
+
+# Compile a file
+result = compiler.compile_file("summarize.yaml", target="claude-3-5-sonnet")
+
+print(f"Compiled Prompt:\n{result.prompt_text}")
+print(f"API Payload: {result.payload}")
 ```
+
+## 🧪 Testing
+
+```bash
+python -m pytest tests/ -v
+```
+
+---
+*Created by the pCompiler Team. Optimize your prompts, automate your evaluations.*
