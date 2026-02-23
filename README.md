@@ -26,6 +26,12 @@ pcompile validate examples/summarize_contract.yaml
 pcompile models
 ```
 
+## Documentation
+
+For detailed information, see:
+- [CLI Reference](docs/cli.md) — Detailed guide for all `pcompile` commands and parameters.
+- [DSL Specification](docs/dsl.md) — Full specification of the YAML prompt definition language.
+
 ## DSL Example
 
 ```yaml

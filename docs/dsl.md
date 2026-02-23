@@ -1,0 +1,106 @@
+# YAML DSL Specification
+
+The `pCompiler` uses a declarative YAML Domain Specific Language (DSL) to define prompt specifications. This allows prompts to be versioned, validated, and optimized for different LLM providers.
+
+## Root Attributes
+
+| Attribute | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `task` | `string` | **Yes** | Name of the task (e.g., `summarize`, `code_generation`). |
+| `input_type` | `string` | No | Semantic type of input (e.g., `legal_contract`, `customer_email`). Default: `text`. |
+| `model_target` | `string` | No | Target model identifier. Default: `gpt-4o`. |
+| `context` | `string` | No | Static context or background information to include. |
+| `user_input_template` | `string` | No | Template for the user input. Use `{input}` placeholder. |
+| `constraints` | `Object` | No | Constraints governing the output behavior. |
+| `instructions` | `Array` | No | List of custom instructions with priorities. |
+| `few_shot_examples` | `Array` | No | Examples of input/output pairs. |
+| `output_schema` | `Object` | No | Expected JSON structure for the output. |
+| `security` | `Object` | No | Security policies and sanitization levels. |
+| `version` | `string` | No | Version of the specification. Default: `1.0`. |
+| `tags` | `Array` | No | List of metadata tags. |
+
+---
+
+## Nested Objects
+
+### `constraints`
+
+Controls the generation parameters and formatting rules.
+
+- `max_tokens` (int): Maximum output tokens.
+- `tone` (enum): The desired tone. Options: `formal`, `informal`, `technical`, `creative`, `neutral` (default).
+- `temperature` (float): Sampling temperature (0.0 to 2.0).
+- `top_p` (float): Nucleus sampling (0.0 to 1.0).
+- `cot_policy` (enum): Chain-of-thought policy. Options: `always`, `auto` (default), `never`.
+- `include_risks` (bool): Ask the model to identify potential risks.
+- `include_citations` (bool): Request source citations.
+- `include_confidence` (bool): Request a confidence score.
+
+### `instructions`
+
+A list of specific goals or rules for the prompt.
+
+- `text` (string): The instruction content.
+- `priority` (int): Priority from 0 to 100. Higher numbers are prioritized by the compiler during context window constraints.
+
+### `few_shot_examples`
+
+Provides in-context learning examples.
+
+- `input` (string): Example user query.
+- `output` (string): Expected model response.
+- `explanation` (string): Optional reasoning for the example.
+
+### `output_schema`
+
+Uses JSON Schema to define the required output structure.
+
+- `type` (string): Root type (usually `object`).
+- `properties` (dict): Field definitions.
+- `required` (list): Required field names.
+
+### `security`
+
+Defines security and sanitization rules.
+
+- `level` (enum): `strict`, `moderate` (default), `permissive`.
+- `block_code_execution` (bool): Sanitize potential code-injection patterns.
+- `block_system_prompt_leak` (bool): Guard against "ignore previous instructions" attacks.
+- `block_instruction_override` (bool): Prevent users from redefining the task.
+
+---
+
+## Complete Example
+
+```yaml
+task: sentiment_analysis
+input_type: product_review
+model_target: claude-3-5-sonnet-20240620
+version: "2.1"
+
+constraints:
+  tone: neutral
+  temperature: 0.3
+  include_confidence: true
+
+instructions:
+  - text: "Analyze the sentiment as strictly Positive, Negative, or Neutral."
+    priority: 100
+  - text: "Ignore emojis and focus on textual content."
+    priority: 50
+
+output_schema:
+  type: object
+  properties:
+    sentiment:
+      type: string
+      enum: [Positive, Negative, Neutral]
+    score:
+      type: number
+    justification:
+      type: string
+  required: [sentiment, score]
+
+security:
+  level: strict
+```
