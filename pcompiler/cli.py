@@ -21,7 +21,8 @@ from rich.table import Table
 
 from pcompiler import __version__
 from pcompiler.compiler import PromptCompiler
-from pcompiler.dsl.parser import ParseError
+from pcompiler.dsl.parser import ParseError, parse_file
+from pcompiler.evals.runner import EvalRunner
 
 console = Console()
 err_console = Console(stderr=True)
@@ -187,6 +188,69 @@ def models() -> None:
         console.print(f"[bold]Loaded plugins:[/] {', '.join(plugins)}")
     else:
         console.print("[yellow]No plugins loaded.[/]")
+
+
+# ---------------------------------------------------------------------------
+# eval
+# ---------------------------------------------------------------------------
+
+@main.command()
+@click.argument("file", type=click.Path(exists=True, dir_okay=False))
+@click.option("--mock", is_flag=True, help="Run with mock execution (no API calls).")
+def eval(file: str, mock: bool) -> None:
+    """Run evaluations for a prompt spec."""
+    compiler = _create_compiler()
+
+    try:
+        spec = parse_file(file)
+    except Exception as exc:
+        err_console.print(f"[bold red]Error parsing file:[/] {exc}")
+        sys.exit(1)
+
+    if not spec.evals.cases:
+        err_console.print("[yellow]No test cases found in spec. Add 'evals' to run evaluations.[/]")
+        return
+
+    # Mock execution functions
+    def mock_executor(payload: Any) -> str:
+        return "This is a mock response for evaluation testing."
+
+    def mock_judge_executor(system: str, user: str) -> str:
+        return '{"score": 0.9, "reason": "Looks good in mock mode."}'
+
+    # In a real scenario, we would use the plugins to actually call the LLM
+    # For now, we use mocks to demonstrate the CLI.
+    if not mock:
+        console.print("[dim]Note: Real execution not yet fully integrated in CLI. Using mocks...[/]")
+
+    runner = EvalRunner(compiler, mock_executor, mock_judge_executor)
+    
+    with console.status("[bold green]Running evaluations..."):
+        report = runner.run_eval(spec)
+
+    # Display results
+    console.print(f"\n[bold]Eval Report for {file}[/]")
+    console.print(f"Success Rate: [bold]{report.success_rate:.0%}[/] ({report.passed_cases}/{report.total_cases} passed)")
+
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Test Case")
+    table.add_column("Output", width=30)
+    table.add_column("Score", justify="center")
+    table.add_column("Pass/Fail", justify="center")
+
+    for result in report.results:
+        status = "[green]PASS[/]" if result.passed else "[red]FAIL[/]"
+        table.add_row(
+            result.case_name,
+            result.output[:100] + ("..." if len(result.output) > 100 else ""),
+            f"{result.average_score:.2f}",
+            status
+        )
+
+    console.print(table)
+
+    if report.success_rate < 1.0:
+        sys.exit(1)
 
 
 # ---------------------------------------------------------------------------

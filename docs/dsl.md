@@ -16,6 +16,7 @@ The `pCompiler` uses a declarative YAML Domain Specific Language (DSL) to define
 | `few_shot_examples` | `Array` | No | Examples of input/output pairs. |
 | `output_schema` | `Object` | No | Expected JSON structure for the output. |
 | `security` | `Object` | No | Security policies and sanitization levels. |
+| `evals` | `Object` | No | Evaluation configuration and test cases. |
 | `version` | `string` | No | Version of the specification. Default: `1.0`. |
 | `tags` | `Array` | No | List of metadata tags. |
 
@@ -63,6 +64,20 @@ Defines dynamic background information to be injected into the prompt.
     - `config` (dict): Provider-specific configuration.
 - `combine_strategy` (enum): `ranked` (default) or `ordered`.
 - `max_total_tokens` (int): Optional limit for the entire context block.
+
+### `evals`
+
+Defines automated test cases to run against the prompt.
+
+- `threshold` (float): Global pass/fail threshold (0.0 to 1.0, default: 0.8).
+- `judge_model` (string): Model used for `llm_judge` metrics.
+- `cases` (Array): List of test cases.
+    - `name` (string): Description of the test.
+    - `input` (dict): Key-value pairs of input variables.
+    - `expected` (string): The 'golden' or expected output.
+    - `metrics` (Array): Metrics to run. Options: `exact_match` (default), `includes`, `regex`, `llm_judge`, `semantic`.
+
+See the [Auto-Evals Guide](evals.md) for more details on how to run and interpret evaluations.
 
 ### `output_schema`
 

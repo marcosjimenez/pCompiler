@@ -1,0 +1,21 @@
+# Example demonstrating Auto-Evals in pCompiler
+task: summarize
+model_target: gpt-4o
+
+evals:
+  threshold: 0.9
+  cases:
+    - name: "Simple greeting"
+      input:
+        input: "Hello, my name is Alice."
+      expected: "Alice"
+      metrics: [includes]
+    - name: "Legal sentence"
+      input:
+        input: "The party of the first part shall indemnify the party of the second part."
+      expected: "Indemnification clause"
+      metrics: [includes, llm_judge]
+
+instructions:
+  - text: "Summarize the input in a single phrase."
+    priority: 100

@@ -119,6 +119,30 @@ class ContextConfig(BaseModel):
     max_total_tokens: int | None = Field(None, gt=0)
 
 
+class MetricType(str, Enum):
+    """Types of automated metrics for evaluation."""
+    EXACT_MATCH = "exact_match"
+    INCLUDES = "includes"
+    REGEX = "regex"
+    LLM_JUDGE = "llm_judge"
+    SEMANTIC_SIMILARITY = "semantic"
+
+
+class EvalTestCase(BaseModel):
+    """A single evaluation test case."""
+    name: str = Field(..., min_length=1)
+    input: dict[str, Any] = Field(default_factory=dict, description="Input variables for the prompt.")
+    expected: str | None = Field(None, description="The 'golden' or expected output.")
+    metrics: list[MetricType] = Field(default_factory=lambda: [MetricType.EXACT_MATCH])
+
+
+class EvalConfig(BaseModel):
+    """Configuration for running evaluations."""
+    cases: list[EvalTestCase] = Field(default_factory=list)
+    judge_model: str = Field("gpt-4o", description="Model to use as the judge.")
+    threshold: float = Field(0.8, ge=0.0, le=1.0, description="Passing score threshold.")
+
+
 # ---------------------------------------------------------------------------
 # Top-level PromptSpec
 # ---------------------------------------------------------------------------
@@ -139,13 +163,12 @@ class PromptSpec(BaseModel):
         instructions:
           - text: "Summarize the key clauses and risks."
             priority: 80
-        context:
-          sources:
-            - type: static
-              value: "The user is a senior legal partner."
-            - type: local_file
-              value: "contract_terms.txt"
-          max_total_tokens: 2000
+        evals:
+          cases:
+            - name: "Short contract"
+              input: { input: "This is a contract..." }
+              expected: "Summary of the contract"
+              metrics: [includes, llm_judge]
         few_shot_examples:
           - input: "Contract clause about liability…"
             output: "The liability clause limits…"
@@ -179,6 +202,7 @@ class PromptSpec(BaseModel):
     few_shot_examples: list[FewShotExample] = Field(default_factory=list)
     output_schema: OutputSchema | None = None
     security: SecurityPolicy = Field(default_factory=SecurityPolicy)
+    evals: EvalConfig = Field(default_factory=EvalConfig)
 
     # --- Metadata ---
     version: str = Field("1.0", description="Spec version for traceability.")

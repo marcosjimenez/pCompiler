@@ -32,6 +32,7 @@ pcompile models
 For detailed information, see:
 - [CLI Reference](docs/cli.md) — Detailed guide for all `pcompile` commands and parameters.
 - [DSL Specification](docs/dsl.md) — Full specification of the YAML prompt definition language.
+- [Auto-Evals Guide](docs/evals.md) — How to define and run automated prompt evaluations.
 - [CI/CD Integration](docs/cicd.md) — How to use `pCompiler` in your automated pipelines.
 - [Packaging and Distribution](docs/packaging.md) — How to build and install `pCompiler` via `pip`.
 
