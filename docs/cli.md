@@ -80,3 +80,27 @@ pcompile models
 - JSON Mode Support.
 - Function Calling Support.
 - List of loaded Extension Plugins.
+
+---
+
+### `create`
+
+Creates a DSL YAML specification from a natural language prompt using an LLM.
+
+**Usage:**
+```bash
+pcompile create [PROMPT] [OPTIONS]
+```
+
+**Arguments:**
+- `PROMPT`: A natural language description of the prompt you want to generate. (Optional if `--file` is used)
+
+**Options:**
+- `-f, --file PATH`: Path to a text file containing the natural language prompt.
+- `-o, --output PATH`: Path to save the generated YAML.
+- `--mock / --no-mock`: Use the mock generator (currently the default) or call a real provider. (Default: `mock`)
+
+**Example:**
+```bash
+pcompile create "Create a prompt to summarize legal contracts." --output summarize.yaml
+```

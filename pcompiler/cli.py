@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -22,6 +23,7 @@ from rich.table import Table
 from pcompiler import __version__
 from pcompiler.compiler import PromptCompiler
 from pcompiler.dsl.parser import ParseError, parse_file
+from pcompiler.dsl.generator import DslGenerator
 from pcompiler.evals.runner import EvalRunner
 
 console = Console()
@@ -251,6 +253,61 @@ def eval(file: str, mock: bool) -> None:
 
     if report.success_rate < 1.0:
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# create
+# ---------------------------------------------------------------------------
+
+@main.command()
+@click.argument("prompt", required=False)
+@click.option(
+    "--file", "-f",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Path to a text file containing the prompt.",
+)
+@click.option(
+    "--output", "-o",
+    type=click.Path(),
+    help="Path to save the generated YAML.",
+)
+@click.option(
+    "--mock", is_flag=True, default=True,
+    help="Use mock generator (currently the default).",
+)
+def create(prompt: str | None, file: str | None, output: str | None, mock: bool) -> None:
+    """Create a DSL YAML specification from a natural language prompt."""
+    if not prompt and not file:
+        err_console.print("[bold red]Error:[/] You must provide either a prompt string or a --file.")
+        sys.exit(1)
+
+    if file:
+        try:
+            prompt_content = Path(file).read_text(encoding="utf-8")
+        except Exception as exc:
+            err_console.print(f"[bold red]Error reading file:[/] {exc}")
+            sys.exit(1)
+    else:
+        prompt_content = prompt  # type: ignore
+
+    generator = DslGenerator()
+    
+    with console.status("[bold green]Generating DSL specification..."):
+        try:
+            yaml_content = generator.generate_yaml(prompt_content)
+        except Exception as exc:
+            err_console.print(f"[bold red]Generation Error:[/] {exc}")
+            sys.exit(1)
+
+    if output:
+        try:
+            Path(output).write_text(yaml_content, encoding="utf-8")
+            console.print(f"[green]✓[/] Generated DSL written to [bold]{output}[/]")
+        except Exception as exc:
+            err_console.print(f"[bold red]Error writing file:[/] {exc}")
+            sys.exit(1)
+    else:
+        console.print(Panel(yaml_content, title="Generated DSL YAML", border_style="cyan"))
 
 
 # ---------------------------------------------------------------------------

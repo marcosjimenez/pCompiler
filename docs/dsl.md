@@ -2,6 +2,9 @@
 
 The `pCompiler` uses a declarative YAML Domain Specific Language (DSL) to define prompt specifications. This allows prompts to be versioned, validated, and optimized for different LLM providers.
 
+> [!TIP]
+> You can automatically generate a starting DSL specification from a natural language prompt using the `pcompile create` command. See the [CLI Reference](cli.md#create) for details.
+
 ## Root Attributes
 
 | Attribute | Type | Required | Description |

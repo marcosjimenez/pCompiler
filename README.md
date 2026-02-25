@@ -1,6 +1,6 @@
 # pCompiler
 
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](pyproject.toml)
+[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11+-green.svg)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 
@@ -8,6 +8,7 @@
 
 ## 🚀 Key Features
 
+- **DSL Generation**: Auto-generate YAML specs from natural language prompts.
 - **Declarative YAML DSL**: Define prompts as typed, versionable specifications.
 - **Context Engineering (RAG)**: Dynamic retrieval from static text, local files, vector stores, and web search.
 - **Auto-Evals System**: Built-in automated metrics (`exact_match`, `regex`) and LLM-as-a-judge for quantitative prompt refinement.
@@ -29,7 +30,14 @@ pip install -e "."
 
 ## 🛠 Quick Start
 
-1. **Define your prompt (`summarize.yaml`):**
+1. **Generate your prompt specification:**
+
+```bash
+# Describe what you want and generate the DSL YAML
+pcompile create "Summarize a medical report focusing on patient history." --output medical.yaml
+```
+
+2. **Define your prompt (`summarize.yaml`):** (Or refine the generated file)
 
 ```yaml
 task: summarize
@@ -59,21 +67,21 @@ evals:
       metrics: [includes, llm_judge]
 ```
 
-2. **Compile it:**
+3. **Compile it:**
 
 ```bash
 # Generate the optimized payload
 pcompile compile summarize.yaml --target gpt-4o
 ```
 
-3. **Validate it:**
+4. **Validate it:**
 
 ```bash
 # Check for ambiguities, contradictions, and injection risks
 pcompile validate summarize.yaml
 ```
 
-4. **Run Evals:**
+5. **Run Evals:**
 
 ```bash
 # Run automated tests to ensure quality

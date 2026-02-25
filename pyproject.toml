@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pcompiler"
-version = "0.3.0"
+version = "0.4.0"
 description = "A prompt compiler that transforms declarative DSL definitions into optimized, model-specific LLM prompts."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [
-    { name = "Marco" },
+    { name = "Marcos Jiménez" },
 ]
 dependencies = [
     "pydantic>=2.0",
