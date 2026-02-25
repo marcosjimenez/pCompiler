@@ -86,6 +86,22 @@ output_schema:
         result = compiler.compile(spec)
         assert result.parameters.get("response_format") == {"type": "json_object"}
 
+    def test_compile_with_jinja_template(self, compiler):
+        spec = parse_string("""
+task: build_list
+model_target: gpt-4o
+user_input_template: |
+  Processing logs:
+  {% for log in logs %}
+  - {{ log }}
+  {% endfor %}
+""")
+        context = {"logs": ["error 1", "warning 2"]}
+        result = compiler.compile(spec, context=context)
+        assert "Processing logs:" in result.prompt_text
+        assert "- error 1" in result.prompt_text
+        assert "- warning 2" in result.prompt_text
+
 
 class TestAnalysis:
     def test_validate_clean_spec(self, compiler, basic_spec):

@@ -13,6 +13,7 @@
 pCompiler allows developers to treat prompts as code. By defining prompts in a structured YAML Domain Specific Language (DSL), you can:
 
 - **Generate** starting specifications from natural language descriptions.
+- **Advanced Templating**: Support for Jinja2 in user input templates (loops, conditionals).
 - **Validate** prompts for ambiguities, contradictions, and security risks.
 - **Optimize** content for specific LLM backends (OpenAI, Anthropic, Gemini).
 - **Automate** quality control with built-in evaluation suites.
@@ -73,6 +74,7 @@ pip install -e ".[dev]"
 ## 📖 Where to get help
 
 - [**DSL Reference**](docs/dsl.md): Detailed documentation of the YAML schema and attributes.
+- [**Advanced Templating**](docs/dsl.md#advanced-templating-jinja2): Using Jinja2 for loops, conditionals, and complex logic.
 - [**CLI Guide**](docs/cli.md): Full list of commands and options.
 - [**Auto-Evals System**](docs/evals.md): How to build and run automated prompt quality tests.
 - [**Context Engineering**](docs/dsl.md#context): Strategies for RAG and dynamic background information.
