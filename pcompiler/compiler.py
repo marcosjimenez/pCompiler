@@ -39,6 +39,7 @@ from pcompiler.plugins.base import CompiledPrompt, PluginManager
 from pcompiler.security.policies import build_policy_set, policy_to_system_lines
 from pcompiler.security.sanitizer import build_system_boundary, wrap_user_input
 from pcompiler.context_manager import ContextManager
+from pcompiler.templates import TemplateEngine
 
 
 # ---------------------------------------------------------------------------
@@ -101,6 +102,7 @@ class PromptCompiler:
         self.plugins = plugin_manager or PluginManager()
         self.cache = cache or (PromptCache() if enable_cache else None)
         self.context_manager = ContextManager()
+        self.template_engine = TemplateEngine()
 
     # ------------------------------------------------------------------
     # Public API
@@ -111,34 +113,40 @@ class PromptCompiler:
         path: str | Path,
         *,
         target: str | None = None,
+        context: dict[str, Any] | None = None,
     ) -> CompiledPrompt:
         """Compile a DSL file into a model-specific prompt."""
         spec = parse_file(path)
-        return self.compile(spec, target=target)
+        return self.compile(spec, target=target, context=context)
 
     def compile_string(
         self,
         yaml_str: str,
         *,
         target: str | None = None,
+        context: dict[str, Any] | None = None,
     ) -> CompiledPrompt:
         """Compile a YAML string."""
         spec = parse_string(yaml_str)
-        return self.compile(spec, target=target)
+        return self.compile(spec, target=target, context=context)
 
     def compile(
         self,
         spec: PromptSpec,
         *,
         target: str | None = None,
+        context: dict[str, Any] | None = None,
     ) -> CompiledPrompt:
         """Run the full compilation pipeline on a PromptSpec."""
         model_target = target or spec.model_target
         spec_dict = spec.model_dump(mode="json")
 
+        # Combine spec metadata for cache key
+        cache_data = {"spec": spec_dict, "context": context}
+
         # --- Cache check ---
         if self.cache:
-            key = self.cache.make_key(spec_dict, model_target)
+            key = self.cache.make_key(cache_data, model_target)
             cached = self.cache.get(key)
             if cached is not None:
                 return cached
@@ -157,7 +165,7 @@ class PromptCompiler:
 
         # --- 2. Build IR ---
         step = trace.start_step("ir_build", "Building intermediate representation")
-        ir = self._build_ir(spec, profile)
+        ir = self._build_ir(spec, profile, context=context)
         trace.end_step(step)
 
         # --- 3. Static analysis ---
@@ -198,7 +206,7 @@ class PromptCompiler:
         if profile is None:
             profile = self.registry.get(spec.model_target)
         if ir is None:
-            ir = self._build_ir(spec, profile)
+            ir = self._build_ir(spec, profile, context=None)
 
         ambiguity = analyze_ambiguity(ir)
         contradictions = detect_contradictions(spec)
@@ -228,7 +236,13 @@ class PromptCompiler:
     # Internal pipeline stages
     # ------------------------------------------------------------------
 
-    def _build_ir(self, spec: PromptSpec, profile: ModelProfile) -> PromptIR:
+    def _build_ir(
+        self,
+        spec: PromptSpec,
+        profile: ModelProfile,
+        *,
+        context: dict[str, Any] | None = None,
+    ) -> PromptIR:
         """Convert a PromptSpec into the IR."""
         ir = PromptIR(task=spec.task, model_target=profile.name)
 
@@ -324,6 +338,10 @@ class PromptCompiler:
         # --- User input template ---
         if spec.user_input_template:
             user_text = spec.user_input_template
+            # Render template if context is provided
+            if context is not None:
+                user_text = self.template_engine.render(user_text, context)
+
             if spec.security.level != SecurityLevel.PERMISSIVE:
                 user_text = wrap_user_input(user_text, spec.security.level)
             ir.add(SectionKind.USER_INPUT, user_text, priority=30)

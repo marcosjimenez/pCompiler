@@ -1,0 +1,35 @@
+task: error_analyzer
+model_target: gpt-4o
+description: "Demonstrates advanced templating with loops and conditionals."
+
+user_input_template: |
+  Analyze the following logs:
+  {% for entry in logs %}
+  - [{{ entry.level | upper }}] {{ entry.message }}
+  {% endfor %}
+
+  {% if priority_mode %}
+  Focus on CRITICAL and ERROR levels above all else.
+  {% endif %}
+
+evals:
+  cases:
+    - name: "Multi-error log"
+      input:
+        logs:
+          - level: "error"
+            message: "Database connection failed"
+          - level: "warning"
+            message: "High latency detected"
+        priority_mode: true
+      expected: "The analysis should highlight the connection failure."
+      metrics: [includes]
+
+    - name: "Normal operation"
+      input:
+        logs:
+          - level: "info"
+            message: "System heartbeat ok"
+        priority_mode: false
+      expected: "Everything looks normal."
+      metrics: [includes]

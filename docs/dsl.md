@@ -13,7 +13,7 @@ The `pCompiler` uses a declarative YAML Domain Specific Language (DSL) to define
 | `input_type` | `string` | No | Semantic type of input (e.g., `legal_contract`, `customer_email`). Default: `text`. |
 | `model_target` | `string` | No | Target model identifier. Default: `gpt-4o`. |
 | `context` | `string` or `Object` | No | Static context or dynamic context configuration (sources, ranking, pruning). |
-| `user_input_template` | `string` | No | Template for the user input. Use `{input}` placeholder. |
+| `user_input_template` | `string` | No | Template for the user input. Supports Jinja2 templating for complex logic. |
 | `constraints` | `Object` | No | Constraints governing the output behavior. |
 | `instructions` | `Array` | No | List of custom instructions with priorities. |
 | `few_shot_examples` | `Array` | No | Examples of input/output pairs. |
@@ -134,4 +134,45 @@ output_schema:
 
 security:
   level: strict
+```
+
+## Advanced Templating (Jinja2)
+
+The `user_input_template` field supports **Jinja2**, a powerful templating engine for Python. This allows you to include logic directly in your YAML:
+
+- **Loops**: Iterate over lists of data.
+- **Conditionals**: Change the prompt content based on input flags.
+- **Filters**: Modify variables (e.g., `{{ var | upper }}`).
+
+### Example: Log Analyzer
+
+This example (found in `examples/advanced_templating.yaml`) shows how to use loops and conditionals.
+
+```yaml
+task: error_analyzer
+model_target: gpt-4o
+description: "Demonstrates advanced templating with loops and conditionals."
+
+user_input_template: |
+  Analyze the following logs:
+  {% for entry in logs %}
+  - [{{ entry.level | upper }}] {{ entry.message }}
+  {% endfor %}
+
+  {% if priority_mode %}
+  Focus on CRITICAL and ERROR levels above all else.
+  {% endif %}
+
+evals:
+  cases:
+    - name: "Multi-error log"
+      input:
+        logs:
+          - level: "error"
+            message: "Database connection failed"
+          - level: "warning"
+            message: "High latency detected"
+        priority_mode: true
+      expected: "The analysis should highlight the connection failure."
+      metrics: [includes]
 ```

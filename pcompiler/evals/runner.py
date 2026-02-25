@@ -37,13 +37,8 @@ class EvalRunner:
         report = EvalReport(threshold=spec.evals.threshold)
         
         for case in spec.evals.cases:
-            # 1. Compile with input variables injected (simplified for now)
-            # In a real scenario, we'd need to substitute variables in the DSL
-            # For now, let's assume the executor handles input vars or we merge them
-            
-            # Simple simulation of variable injection:
-            # (In a more robust version, this would happen in the compiler/parser)
-            compiled = self.compiler.compile(spec)
+            # 1. Compile with input variables injected via Jinja2
+            compiled = self.compiler.compile(spec, context=case.input)
             
             # 2. Execute
             output = self.executor(compiled.payload)
