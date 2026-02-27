@@ -20,12 +20,6 @@ class AnthropicPlugin(BackendPlugin):
     def name(self) -> str:
         return "anthropic"
 
-    def supported_models(self) -> list[str]:
-        return [
-            "claude-3.5-sonnet", "claude-3-opus", "claude-3-sonnet",
-            "claude-3-haiku", "claude-3.5-haiku",
-        ]
-
     def emit(self, ir: PromptIR, profile: ModelProfile) -> CompiledPrompt:
         system_text = ""
         messages: list[dict[str, str]] = []

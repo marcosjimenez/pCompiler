@@ -20,9 +20,6 @@ class OpenAIPlugin(BackendPlugin):
     def name(self) -> str:
         return "openai"
 
-    def supported_models(self) -> list[str]:
-        return ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"]
-
     def emit(self, ir: PromptIR, profile: ModelProfile) -> CompiledPrompt:
         messages: list[dict[str, str]] = []
         parameters: dict[str, Any] = {}

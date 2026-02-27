@@ -18,7 +18,7 @@ else:
     from importlib.metadata import entry_points
 
 from pcompiler.ir.nodes import PromptIR
-from pcompiler.models.registry import ModelProfile
+from pcompiler.models.registry import ModelProfile, ModelRegistry
 
 
 # ---------------------------------------------------------------------------
@@ -61,10 +61,6 @@ class BackendPlugin(ABC):
         """Unique identifier for this plugin (e.g. ``'openai'``)."""
 
     @abstractmethod
-    def supported_models(self) -> list[str]:
-        """List of model identifiers this plugin can handle."""
-
-    @abstractmethod
     def emit(self, ir: PromptIR, profile: ModelProfile) -> CompiledPrompt:
         """Transform an IR into a model-specific compiled prompt."""
 
@@ -97,7 +93,7 @@ class PluginManager:
 
     def __init__(self, *, auto_discover: bool = True) -> None:
         self._plugins: dict[str, BackendPlugin] = {}
-        self._model_map: dict[str, str] = {}  # model_name → plugin_name
+        self.registry = ModelRegistry()
         if auto_discover:
             self._discover()
 
@@ -126,8 +122,6 @@ class PluginManager:
         """Register a plugin instance."""
         name = plugin.name()
         self._plugins[name] = plugin
-        for model in plugin.supported_models():
-            self._model_map[model.lower()] = name
 
     # -- Lookup ------------------------------------------------------------
 
@@ -137,14 +131,23 @@ class PluginManager:
         Raises:
             KeyError: If no plugin supports the requested model.
         """
-        key = model_name.lower()
-        if key not in self._model_map:
-            available = ", ".join(sorted(self._model_map))
+        try:
+            profile = self.registry.get(model_name)
+        except KeyError:
+            available = ", ".join(sorted(self.registry.list_models()))
             raise KeyError(
-                f"No plugin registered for model '{model_name}'. "
+                f"Unknown model '{model_name}'. "
                 f"Available models: {available}"
             )
-        return self._plugins[self._model_map[key]]
+
+        provider = profile.provider
+        if provider not in self._plugins:
+            available = ", ".join(sorted(self._plugins))
+            raise KeyError(
+                f"No plugin registered for provider '{provider}' (needed for model '{model_name}'). "
+                f"Available plugins: {available}"
+            )
+        return self._plugins[provider]
 
     def get_plugin(self, plugin_name: str) -> BackendPlugin:
         """Return a plugin by its name."""
@@ -161,4 +164,4 @@ class PluginManager:
 
     def list_supported_models(self) -> list[str]:
         """Return sorted list of all supported model identifiers."""
-        return sorted(self._model_map)
+        return self.registry.list_models()

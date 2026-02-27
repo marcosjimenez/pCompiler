@@ -1,0 +1,80 @@
+[
+    {
+        "name": "gpt-4o",
+        "provider": "openai",
+        "max_context_tokens": 128000,
+        "max_output_tokens": 16384,
+        "supports_system_prompt": true,
+        "supports_json_mode": true,
+        "supports_function_calling": true,
+        "supports_vision": true,
+        "default_temperature": 0.7
+    },
+    {
+        "name": "gpt-4o-mini",
+        "provider": "openai",
+        "max_context_tokens": 128000,
+        "max_output_tokens": 16384,
+        "supports_system_prompt": true,
+        "supports_json_mode": true,
+        "supports_function_calling": true,
+        "supports_vision": true,
+        "default_temperature": 0.7
+    },
+    {
+        "name": "claude-3.5-sonnet",
+        "provider": "anthropic",
+        "max_context_tokens": 200000,
+        "max_output_tokens": 8192,
+        "supports_system_prompt": true,
+        "supports_json_mode": false,
+        "supports_function_calling": true,
+        "supports_vision": true,
+        "default_temperature": 0.7,
+        "extra": {
+            "thinking_tags": true
+        }
+    },
+    {
+        "name": "claude-3-opus",
+        "provider": "anthropic",
+        "max_context_tokens": 200000,
+        "max_output_tokens": 4096,
+        "supports_system_prompt": true,
+        "supports_json_mode": false,
+        "supports_function_calling": true,
+        "supports_vision": true,
+        "default_temperature": 0.7,
+        "extra": {
+            "thinking_tags": true
+        }
+    },
+    {
+        "name": "gemini-1.5-pro",
+        "provider": "google",
+        "max_context_tokens": 1000000,
+        "max_output_tokens": 8192,
+        "supports_system_prompt": true,
+        "supports_json_mode": true,
+        "supports_function_calling": true,
+        "supports_vision": true,
+        "default_temperature": 0.7,
+        "extra": {
+            "response_mime_type": "application/json"
+        }
+    },
+    {
+        "name": "gemini-2.0-flash",
+        "provider": "google",
+        "max_context_tokens": 1000000,
+        "max_output_tokens": 8192,
+        "supports_system_prompt": true,
+        "supports_json_mode": true,
+        "supports_function_calling": true,
+        "supports_vision": true,
+        "default_temperature": 0.7,
+        "extra": {
+            "response_mime_type": "application/json"
+        }
+    }
+]

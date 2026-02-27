@@ -6,7 +6,9 @@ capabilities and optimal default parameters.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+import json
+from pathlib import Path
+from typing import Any, cast
 
 
 @dataclass(frozen=True)
@@ -122,12 +124,35 @@ class ModelRegistry:
     """
 
     _instance: ModelRegistry | None = None
+    _profiles: dict[str, ModelProfile]
 
     def __new__(cls) -> ModelRegistry:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._profiles = dict(_BUILTIN_PROFILES)
+            cls._instance._profiles = cls._load_profiles()
         return cls._instance
+
+    @classmethod
+    def _load_profiles(cls) -> dict[str, ModelProfile]:
+        profiles = dict(_BUILTIN_PROFILES)
+        config_path = Path("config.json")
+        
+        if config_path.is_file():
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                
+                if isinstance(data, list):
+                    loaded_profiles = {}
+                    for item in data:
+                        item_dict = cast(dict[str, Any], item)
+                        profile = ModelProfile(**item_dict)
+                        loaded_profiles[profile.name] = profile
+                    profiles = loaded_profiles
+            except Exception:
+                pass
+                
+        return profiles
 
     # -- public API --------------------------------------------------------
 

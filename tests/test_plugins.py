@@ -48,8 +48,25 @@ class TestPluginManager:
 
     def test_unknown_model_error(self):
         pm = PluginManager(auto_discover=False)
-        with pytest.raises(KeyError, match="No plugin"):
+        with pytest.raises(KeyError, match="Unknown model"):
             pm.get_plugin_for_model("unknown-model")
+
+    def test_missing_provider_plugin_error(self, registry):
+        # Register a model with a dummy provider
+        from pcompiler.models.registry import ModelProfile
+        registry.register(ModelProfile(
+            name="new-model",
+            provider="new-provider",
+            max_context_tokens=1000,
+            max_output_tokens=100
+        ))
+        
+        pm = PluginManager(auto_discover=False)
+        # OpenAI plugin is NOT new-provider
+        pm.register(OpenAIPlugin())
+        
+        with pytest.raises(KeyError, match="No plugin registered for provider 'new-provider'"):
+            pm.get_plugin_for_model("new-model")
 
     def test_list_supported_models(self):
         pm = PluginManager(auto_discover=False)

@@ -20,9 +20,6 @@ class GooglePlugin(BackendPlugin):
     def name(self) -> str:
         return "google"
 
-    def supported_models(self) -> list[str]:
-        return ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.0-flash"]
-
     def emit(self, ir: PromptIR, profile: ModelProfile) -> CompiledPrompt:
         system_instruction = ""
         contents: list[dict[str, Any]] = []
