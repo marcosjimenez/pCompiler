@@ -142,13 +142,17 @@ class ModelRegistry:
                 with open(config_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 
-                if isinstance(data, list):
+                if isinstance(data, dict):
                     loaded_profiles = {}
-                    for item in data:
-                        item_dict = cast(dict[str, Any], item)
-                        profile = ModelProfile(**item_dict)
-                        loaded_profiles[profile.name] = profile
-                    profiles = loaded_profiles
+                    for provider, models in data.items():
+                        if isinstance(models, list):
+                            for item in models:
+                                item_dict = cast(dict[str, Any], item)
+                                item_dict["provider"] = provider
+                                profile = ModelProfile(**item_dict)
+                                loaded_profiles[profile.name] = profile
+                    if loaded_profiles:
+                        profiles = loaded_profiles
             except Exception:
                 pass
                 

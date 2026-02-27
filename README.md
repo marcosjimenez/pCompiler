@@ -80,6 +80,7 @@ pip install -e ".[dev]"
 - [**Context Engineering**](docs/dsl.md#context): Strategies for RAG and dynamic background information.
 - [**Integrated CI/CD**](docs/cicd.md): Automating validation and testing in your pipeline.
 - [**Packaging**](docs/packaging.md): How to build and distribute pCompiler on your own registry.
+- [**Plugin System**](docs/plugins.md): Guide on how to use, write and manage backend plugins and their associated models.
 
 ## 👥 Who maintains & contributes
 

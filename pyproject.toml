@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pcompiler"
-version = "0.6.0"
+version = "0.6.1"
 description = "A prompt compiler that transforms declarative DSL definitions into optimized, model-specific LLM prompts."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,3 +34,4 @@ pcompile = "pcompiler.cli:main"
 openai = "pcompiler.plugins.openai_plugin:OpenAIPlugin"
 anthropic = "pcompiler.plugins.anthropic_plugin:AnthropicPlugin"
 google = "pcompiler.plugins.google_plugin:GooglePlugin"
+mistral = "pcompiler.plugins.mistral_plugin:MistralPlugin"

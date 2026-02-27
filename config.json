@@ -1,80 +1,172 @@
-[
-    {
-        "name": "gpt-4o",
-        "provider": "openai",
-        "max_context_tokens": 128000,
-        "max_output_tokens": 16384,
-        "supports_system_prompt": true,
-        "supports_json_mode": true,
-        "supports_function_calling": true,
-        "supports_vision": true,
-        "default_temperature": 0.7
-    },
-    {
-        "name": "gpt-4o-mini",
-        "provider": "openai",
-        "max_context_tokens": 128000,
-        "max_output_tokens": 16384,
-        "supports_system_prompt": true,
-        "supports_json_mode": true,
-        "supports_function_calling": true,
-        "supports_vision": true,
-        "default_temperature": 0.7
-    },
-    {
-        "name": "claude-3.5-sonnet",
-        "provider": "anthropic",
-        "max_context_tokens": 200000,
-        "max_output_tokens": 8192,
-        "supports_system_prompt": true,
-        "supports_json_mode": false,
-        "supports_function_calling": true,
-        "supports_vision": true,
-        "default_temperature": 0.7,
-        "extra": {
-            "thinking_tags": true
+{
+    "openai": [
+        {
+            "name": "gpt-5.3",
+            "max_context_tokens": 400000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gpt-5.2",
+            "max_context_tokens": 128000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gpt-5.1",
+            "max_context_tokens": 128000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gpt-4.1",
+            "max_context_tokens": 128000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gpt-4o",
+            "max_context_tokens": 128000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gpt-4o-mini",
+            "max_context_tokens": 128000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
         }
-    },
-    {
-        "name": "claude-3-opus",
-        "provider": "anthropic",
-        "max_context_tokens": 200000,
-        "max_output_tokens": 4096,
-        "supports_system_prompt": true,
-        "supports_json_mode": false,
-        "supports_function_calling": true,
-        "supports_vision": true,
-        "default_temperature": 0.7,
-        "extra": {
-            "thinking_tags": true
+    ],
+    "anthropic": [
+        {
+            "name": "claude-opus-4.6",
+            "max_context_tokens": 1000000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "claude-sonnet-4.5",
+            "max_context_tokens": 200000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "claude-haiku-4.5",
+            "max_context_tokens": 200000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
         }
-    },
-    {
-        "name": "gemini-1.5-pro",
-        "provider": "google",
-        "max_context_tokens": 1000000,
-        "max_output_tokens": 8192,
-        "supports_system_prompt": true,
-        "supports_json_mode": true,
-        "supports_function_calling": true,
-        "supports_vision": true,
-        "default_temperature": 0.7,
-        "extra": {
-            "response_mime_type": "application/json"
+    ],
+    "google": [
+        {
+            "name": "gemini-3-pro",
+            "max_context_tokens": 1000000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gemini-2.5-pro",
+            "max_context_tokens": 1000000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "gemini-2.5-flash",
+            "max_context_tokens": 1000000,
+            "supports_system_prompt": true,
+            "supports_json_mode": true,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
         }
-    },
-    {
-        "name": "gemini-2.0-flash",
-        "provider": "google",
-        "max_context_tokens": 1000000,
-        "max_output_tokens": 8192,
-        "supports_system_prompt": true,
-        "supports_json_mode": true,
-        "supports_function_calling": true,
-        "supports_vision": true,
-        "default_temperature": 0.7,
-        "extra": {
-            "response_mime_type": "application/json"
+    ],
+    "mistral": [
+        {
+            "name": "mistral-large-3",
+            "max_context_tokens": 32000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": true,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "ministral-3-14b",
+            "max_context_tokens": 32000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": false,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "ministral-3-8b",
+            "max_context_tokens": 32000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": false,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "ministral-3-3b",
+            "max_context_tokens": 32000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": true,
+            "supports_vision": false,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "mixtral-8x22b",
+            "max_context_tokens": 64000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": false,
+            "supports_vision": false,
+            "default_temperature": 0.7
+        },
+        {
+            "name": "mixtral-8x7b",
+            "max_context_tokens": 32000,
+            "supports_system_prompt": true,
+            "supports_json_mode": false,
+            "supports_function_calling": false,
+            "supports_vision": false,
+            "default_temperature": 0.7
         }
-    }
-]
+    ]
+}
