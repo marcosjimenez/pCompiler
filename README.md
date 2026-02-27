@@ -1,6 +1,5 @@
 # pCompiler
 
-[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11+-green.svg)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 
