@@ -63,6 +63,47 @@ pcompile validate [FILE]
 
 ---
 
+### `estimate`
+
+Estimates the economic cost and latency of a prompt before sending it to a model.
+
+**Usage:**
+```bash
+pcompile estimate [FILE] [OPTIONS]
+```
+
+**Arguments:**
+- `FILE`: The path to the YAML DSL specification file. (Required)
+
+**Options:**
+- `-t, --target TEXT`: Override the `model_target` defined in the YAML spec.
+- `--output-tokens INTEGER`: Expected number of output tokens. If not provided, the model's maximum output capacity is used for calculation.
+- `--compare`: Run the estimation across all registered models and return a sorted comparison table (from cheapest to most expensive).
+
+**Output:**
+- A Rich-formatted table displaying the provider, input/output tokens, input/output costs, total cost (USD), and expected latency (ms).
+
+---
+
+### `update-pricing`
+
+Updates the `config.json` model definitions with the latest reference pricing data included in the CLI.
+
+**Usage:**
+```bash
+pcompile update-pricing [OPTIONS]
+```
+
+**Options:**
+- `-c, --config PATH`: Path to the config JSON file (default: `./config.json`).
+- `--dry-run`: Evaluate pricing changes and display them without writing modifications to the config file.
+
+**Output:**
+- A summary of all fields changed (old value vs new value).
+- A list of updated models.
+
+---
+
 ### `models`
 
 Lists all available target models, their capabilities, and loaded plugins.

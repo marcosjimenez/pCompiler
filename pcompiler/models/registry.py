@@ -25,6 +25,9 @@ class ModelProfile:
     supports_vision: bool = False
     default_temperature: float = 0.7
     default_top_p: float = 1.0
+    input_price_per_mtok: float = 0.0
+    output_price_per_mtok: float = 0.0
+    avg_latency_ms_per_output_token: float = 0.0
     optimal_section_order: list[str] = field(default_factory=lambda: [
         "SECURITY_PREAMBLE", "SYSTEM", "CONTEXT", "INSTRUCTIONS",
         "EXAMPLES", "OUTPUT_FORMAT", "CHAIN_OF_THOUGHT", "USER_INPUT",

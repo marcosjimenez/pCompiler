@@ -15,6 +15,7 @@ pCompiler allows developers to treat prompts as code. By defining prompts in a s
 - **Advanced Templating**: Support for Jinja2 in user input templates (loops, conditionals).
 - **Validate** prompts for ambiguities, contradictions, and security risks.
 - **Optimize** content for specific LLM backends (OpenAI, Anthropic, Gemini).
+- **Estimate Costs** before execution with real-time pricing and latency analytics.
 - **Automate** quality control with built-in evaluation suites.
 - **Deploy** versioned, reproducible prompt payloads to your applications.
 
@@ -75,6 +76,7 @@ pip install -e ".[dev]"
 - [**DSL Reference**](docs/dsl.md): Detailed documentation of the YAML schema and attributes.
 - [**Advanced Templating**](docs/dsl.md#advanced-templating-jinja2): Using Jinja2 for loops, conditionals, and complex logic.
 - [**CLI Guide**](docs/cli.md): Full list of commands and options.
+- [**Cost & Latency Estimator**](docs/cost_estimation.md): How to estimate prompt costs before execution and manage pricing data.
 - [**Auto-Evals System**](docs/evals.md): How to build and run automated prompt quality tests.
 - [**Context Engineering**](docs/dsl.md#context): Strategies for RAG and dynamic background information.
 - [**Integrated CI/CD**](docs/cicd.md): Automating validation and testing in your pipeline.

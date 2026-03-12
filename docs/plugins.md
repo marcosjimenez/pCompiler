@@ -126,4 +126,7 @@ Open `config.json` and insert a new object mapping inside the provider key:
 - `supports_function_calling` (bool): Signals support for tool/function calling.
 - `supports_vision` (bool): Signals if image/vision inputs are accepted.
 - `default_temperature` (float): Fallback temperature setting if not overridden in the DSL.
+- `input_price_per_mtok` (float, optional): Cost in USD per million input tokens.
+- `output_price_per_mtok` (float, optional): Cost in USD per million output tokens.
+- `avg_latency_ms_per_output_token` (float, optional): Average latency in milliseconds per generated output token.
 - `extra` (object, optional): Any specific extra configurations (e.g. `thinking_tags`).
