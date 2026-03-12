@@ -256,6 +256,144 @@ def eval(file: str, mock: bool) -> None:
 
 
 # ---------------------------------------------------------------------------
+# estimate
+# ---------------------------------------------------------------------------
+
+@main.command()
+@click.argument("file", type=click.Path(exists=True, dir_okay=False))
+@click.option(
+    "--target", "-t",
+    default=None,
+    help="Target model (overrides the spec's model_target).",
+)
+@click.option(
+    "--output-tokens",
+    type=int,
+    default=None,
+    help="Expected number of output tokens.",
+)
+@click.option(
+    "--compare",
+    is_flag=True,
+    help="Compare cost and latency across all available models.",
+)
+def estimate(file: str, target: str | None, output_tokens: int | None, compare: bool) -> None:
+    """Estimate cost and latency for a prompt execution."""
+    from pcompiler.analysis.cost_estimator import CostEstimator
+    
+    compiler = _create_compiler()
+
+    try:
+        spec = parse_file(file)
+        target_model = target or spec.model_target
+        if not target_model:
+            err_console.print("[bold red]Error:[/] No target model specified. Use --target or specify model_target in spec.")
+            sys.exit(1)
+        profile = compiler.registry.get(target_model)
+        ir = compiler._build_ir(spec, profile)
+    except ParseError as exc:
+        err_console.print(f"[bold red]Parse Error:[/] {exc}")
+        sys.exit(1)
+    except KeyError as exc:
+        err_console.print(f"[bold red]Error:[/] {exc}")
+        sys.exit(1)
+    except Exception as exc:
+        err_console.print(f"[bold red]Error:[/] {exc}")
+        sys.exit(1)
+
+    estimator = CostEstimator(compiler.registry)
+
+    if compare:
+        try:
+            estimates = estimator.compare(ir, expected_output_tokens=output_tokens)
+        except Exception as exc:
+            err_console.print(f"[bold red]Error:[/] {exc}")
+            sys.exit(1)
+
+        console.print("Cost & Latency Comparison")
+        table = Table(show_lines=True)
+        table.add_column("Model", style="bold cyan")
+        table.add_column("Provider")
+        table.add_column("Input Tokens", justify="right")
+        table.add_column("Output Tokens", justify="right")
+        table.add_column("Input Cost", justify="right")
+        table.add_column("Output Cost", justify="right")
+        table.add_column("Total Cost", justify="right")
+        table.add_column("Latency", justify="right")
+
+        for est in estimates:
+            table.add_row(
+                est.model,
+                est.provider,
+                f"{est.input_tokens:,}",
+                f"{est.output_tokens:,}",
+                f"${est.input_cost_usd:.6f}",
+                f"${est.output_cost_usd:.6f}",
+                f"${est.total_cost_usd:.6f}",
+                f"{est.estimated_latency_ms:,.0f} ms"
+            )
+        console.print(table)
+    else:
+        try:
+            est = estimator.estimate(ir, target_model, expected_output_tokens=output_tokens)
+        except Exception as exc:
+            err_console.print(f"[bold red]Error:[/] {exc}")
+            sys.exit(1)
+            
+        console.print(f"Cost Estimate — [bold cyan]{est.model}[/]")
+        table = Table(show_lines=True)
+        table.add_column("Metric")
+        table.add_column("Value", justify="right")
+        
+        table.add_row("Provider", est.provider)
+        table.add_row("Input Tokens", f"{est.input_tokens:,}")
+        table.add_row("Output Tokens", f"{est.output_tokens:,}")
+        table.add_row("Input Cost", f"${est.input_cost_usd:.6f}")
+        table.add_row("Output Cost", f"${est.output_cost_usd:.6f}")
+        table.add_row("Total Cost", f"${est.total_cost_usd:.6f}")
+        table.add_row("Est. Latency", f"{est.estimated_latency_ms:,.0f} ms")
+        console.print(table)
+
+
+# ---------------------------------------------------------------------------
+# update-pricing
+# ---------------------------------------------------------------------------
+
+@main.command(name="update-pricing")
+@click.option("--dry-run", is_flag=True, help="Compute changes without modifying config.json.")
+def update_pricing(dry_run: bool) -> None:
+    """Update config.json with latest reference pricing."""
+    from pcompiler.analysis.pricing_updater import PricingUpdater
+    
+    updater = PricingUpdater()
+    try:
+        result = updater.update_config(Path("config.json"), dry_run=dry_run)
+    except FileNotFoundError:
+        err_console.print("[yellow]Warning:[/] config.json not found in the current directory.")
+        sys.exit(1)
+    except Exception as exc:
+        err_console.print(f"[bold red]Error updating pricing:[/] {exc}")
+        sys.exit(1)
+
+    console.print("[bold]Price Update Report[/]")
+    console.print(f"Models Updated: {len(result.updated_models)}")
+    console.print(f"Total Pricing Changes: {result.total_changes}")
+    
+    if result.not_found:
+        console.print("\n[yellow]Skipped Models (Not found in reference pricing):[/]")
+        for model in result.not_found:
+            console.print(f"  • {model}")
+            
+    if result.changes:
+        console.print("\n[green]Pricing Updates:[/]")
+        for change in result.changes:
+            console.print(f"  • {change.model} ({change.provider}) - {change.field}: ${change.old_value:.6f} -> ${change.new_value:.6f}")
+            
+    if dry_run:
+        console.print("\n[cyan](Dry Run Mode: No changes were made to config.json)[/]")
+
+
+# ---------------------------------------------------------------------------
 # create
 # ---------------------------------------------------------------------------
 
