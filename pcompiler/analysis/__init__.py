@@ -1,1 +1,1 @@
-"""Static analysis and validation for prompts."""
+"""Static analysis, validation, and cost estimation for prompts."""
